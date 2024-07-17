@@ -8,11 +8,15 @@ import { Resizer } from './systems/Resizer.js';
 import { createLights } from './components/lights.js';
 import { Loop } from './systems/Loop.js';
 import { createControls } from './systems/controls.js';
+import { loadBirds } from './components/birds/birds.js';
+import { Object3D } from 'three';
+
 
 let camera
 let renderer
 let scene
 let loop
+let controls
 class World {
     constructor(container) {
         camera = createCamera()
@@ -20,13 +24,9 @@ class World {
         renderer = createRenderer()
         loop = new Loop(camera, scene, renderer)
 
-
         container.append(renderer.domElement)
 
-        // const cube = createCube()
-        const meshGroup = createMeshGroup()
 
-        loop.updatables.push(meshGroup)
         loop.updatables.push(camera)
 
         const {
@@ -38,8 +38,6 @@ class World {
 
 
         scene.add(
-            // cube,
-            meshGroup,
 
             directionalLight,
 
@@ -51,8 +49,7 @@ class World {
         }
         loop.updatables.push(directionalLight)
 
-
-        const controls = createControls(camera, renderer.domElement, directionalLight)
+        controls = createControls(camera, renderer.domElement)
 
         const resizer = new Resizer(container, camera, renderer)
         loop.updatables.push(controls)
@@ -67,6 +64,46 @@ class World {
     }
     stop() {
         loop.stop()
+    }
+    async init() {
+        const { parrot, flamingo, stork } = await loadBirds()
+        scene.add(parrot, flamingo, stork)
+        controls.target.copy(parrot.position)
+        this.list = [parrot, flamingo, stork,]
+        this.index = 0
+        const center = new Object3D()
+        center.position.set(
+            1, 1, 1
+        )
+        scene.add(center)
+        this.list.push(center)
+
+        const btn = document.querySelector("#btn")
+        btn.addEventListener('click', () => {
+            this.focusNext()
+        })
+    }
+    focusNext() {
+        this.index = ++this.index % this.list.length
+        const target = this.list[this.index]
+        let start = 0
+        let flag = false
+        controls.tick = (delta) => {
+            controls.update()
+            if (flag) return;
+            start += delta
+            if (start >= 1) {
+                controls.target.copy(
+                    target.position
+                )
+                flag = true
+            } else {
+                controls.target.lerp(target.position, start / 1)
+            }
+
+        }
+
+
     }
 }
 export {

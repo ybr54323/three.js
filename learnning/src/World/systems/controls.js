@@ -1,14 +1,19 @@
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
-function createControls(camera, canvas, directionalLight) {
+function createControls(camera, canvas) {
     const controls = new OrbitControls(camera, canvas)
 
 
+    // controls.tick = (delta, callback = () => { }) => {
 
-    controls.tick = () => {
-        controls.update()
-    }
+
+    //     callback()
+
+
+
+    //     controls.update()
+    // }
 
     return controls
 }
