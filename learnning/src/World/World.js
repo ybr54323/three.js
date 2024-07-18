@@ -68,6 +68,11 @@ class World {
     async init() {
         const { parrot, flamingo, stork } = await loadBirds()
         scene.add(parrot, flamingo, stork)
+        loop.updatables.push(
+            parrot,
+            // flamingo,
+            // stork,
+        )
         controls.target.copy(parrot.position)
         this.list = [parrot, flamingo, stork,]
         this.index = 0
@@ -81,6 +86,17 @@ class World {
         const btn = document.querySelector("#btn")
         btn.addEventListener('click', () => {
             this.focusNext()
+        })
+
+        const range = document.querySelector('#range')
+        range.addEventListener('change', evt => {
+
+            const value = evt.target.value / 100;
+
+            const target = this.list[this.index]
+
+            target._action.setEffectiveWeight(value)
+
         })
     }
     focusNext() {
